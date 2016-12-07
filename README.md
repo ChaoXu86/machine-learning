@@ -1,2 +1,2 @@
 # machine-learning
-Exercises of machine-learning(Course.org, Andrew Ng)
+Exercises of machine-learning(coursera.org, Andrew Ng)
