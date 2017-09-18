@@ -111,8 +111,8 @@ sae2Theta = initializeParameters(hiddenSizeL2, hiddenSizeL1);
                              sae2Theta, options);
 
                              %% display the W1 of hidden layer1
-W1_hiddenL2 = reshape(sae1OptTheta(1:hiddenSizeL2*hiddenSizeL1), hiddenSizeL2, hiddenSizeL1);
-display_network(W1_hiddenL2'); 
+%W1_hiddenL2 = reshape(sae1OptTheta(1:hiddenSizeL2*hiddenSizeL1), hiddenSizeL2, hiddenSizeL1);
+%display_network(W1_hiddenL2'); 
 
 % -------------------------------------------------------------------------
 
