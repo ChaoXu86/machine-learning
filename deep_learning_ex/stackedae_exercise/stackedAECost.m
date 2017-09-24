@@ -29,15 +29,16 @@ stack = params2stack(theta(hiddenSize*numClasses+1:end), netconfig);
 softmaxThetaGrad = zeros(size(softmaxTheta));
 stackgrad = cell(size(stack));
 for d = 1:numel(stack)
-    stackgrad{d}.w = zeros(size(stack{d}.w));
-    stackgrad{d}.b = zeros(size(stack{d}.b));
+  stackgrad{d}.w = zeros(size(stack{d}.w));
+  stackgrad{d}.b = zeros(size(stack{d}.b));
 end
 
 cost = 0; % You need to compute this
 
 % You might find these variables useful
-m = size(data, 2);
-groundTruth = full(sparse(labels, 1:m, 1));
+M = size(data, 2);
+numCases = size(data, 1);
+groundTruth = full(sparse(labels, 1:M, 1));
 
 
 %% --------------------------- YOUR CODE HERE -----------------------------
@@ -63,40 +64,36 @@ groundTruth = full(sparse(labels, 1:m, 1));
 
 %% copied from https://github.com/danluu/UFLDL-tutorial/blob/master/stackedae_exercise/stackedAECost.m
 
-n = numel(stack);
-z = cell(n+1, 1);
-a = cell(n+1, 1);
+depth = numel(stack);
+z = cell(depth+1,1);
+a = cell(depth+1, 1);
 a{1} = data;
 
-for l = (1:n)
-    z_temp = stack{l}.w * a{l};
-    z{l+1} = bsxfun(@plus, z_temp, stack{l}.b);
-    a{l+1} = sigmoid(z{l+1});
+for layer = (1:depth)
+  z{layer+1} = stack{layer}.w * a{layer} + repmat(stack{layer}.b, [1, size(a{layer},2)]);
+  a{layer+1} = sigmoid(z{layer+1});
 end
 
-% Equivalent of doing softmax calculation
-td = softmaxTheta * a{n+1};
-td = bsxfun(@minus, td, max(td));
-temp = exp(td);
-denominator = sum(temp);
-p = bsxfun(@rdivide, temp, denominator);
+M = softmaxTheta * a{depth+1};
+M = bsxfun(@minus, M, max(M));
+p = bsxfun(@rdivide, exp(M), sum(exp(M)));
 
-y = groundTruth;
-cost = (-1/m) * sum(sum(y .* log(p))) + (lambda / 2) * sum(sum(theta .^2));
-softmaxThetaGrad = (-1/m) * (y - p) * a{n+1}' + lambda * softmaxTheta;
+cost = -1/numCases * groundTruth(:)' * log(p(:)) + lambda/2 * sum(softmaxTheta(:) .^ 2);
+softmaxThetaGrad = -1/numCases * (groundTruth - p) * a{depth+1}' + lambda * softmaxTheta;
 
-% delta
-d = cell(n+1);
-d{n+1} = -(softmaxTheta' * (y - p)) .* a{n + 1} .* (1 -a{n + 1});
+d = cell(depth+1);
 
-for l = (n:-1:2)
-    d{l} = stack{l}.w' * d{l+1} .* a{l} .* (1-a{l});
+d{depth+1} = -(softmaxTheta' * (groundTruth - p)) .* a{depth+1} .* (1-a{depth+1});
+
+for layer = (depth:-1:2)
+  d{layer} = (stack{layer}.w' * d{layer+1}) .* a{layer} .* (1-a{layer});
 end
 
-for l = (n:-1:1)
-    stackgrad{l}.w = d{l+1} * a{l}' / m;
-    stackgrad{l}.b = sum(d{l+1}, 2) / m;
+for layer = (depth:-1:1)
+  stackgrad{layer}.w = (1/numCases) * d{layer+1} * a{layer}';
+  stackgrad{layer}.b = (1/numCases) * sum(d{layer+1}, 2);
 end
+
 
 % -------------------------------------------------------------------------
 

@@ -24,7 +24,7 @@ stack = params2stack(theta(hiddenSize*numClasses+1:end), netconfig);
 %  Instructions: Compute pred using theta assuming that the labels start 
 %                from 1.
 
-n = numel(stack)
+n = numel(stack);
 z = cell(n+1, 1);
 a = cell(n+1, 1);
 a{1} = data;

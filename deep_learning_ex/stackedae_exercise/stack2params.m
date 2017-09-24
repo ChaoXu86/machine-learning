@@ -22,6 +22,7 @@ for d = 1:numel(stack)
     params = [params ; stack{d}.w(:) ; stack{d}.b(:) ];
     
     % Check that stack is of the correct form
+    warning('off');
     assert(size(stack{d}.w, 1) == size(stack{d}.b, 1), ...
         ['The bias should be a *column* vector of ' ...
          int2str(size(stack{d}.w, 1)) 'x1']);

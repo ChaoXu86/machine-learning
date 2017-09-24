@@ -1,5 +1,8 @@
 %% CS294A/CS294W Stacked Autoencoder Exercise
 
+%% suppressing annoying warning message
+warning('off', 'all');
+
 %  Instructions
 %  ------------
 % 
@@ -59,7 +62,7 @@ sae1Theta = initializeParameters(hiddenSizeL1, inputSize);
 
 %  Use minFunc to minimize the function
 addpath minFunc/
-
+options = struct;
 options.Method = 'lbfgs'; % Here, we use L-BFGS to optimize our cost
                           % function. Generally, for minFunc to work, you
                           % need a function pointer with two outputs: the
@@ -75,6 +78,8 @@ options.display = 'on';
                                  beta, trainData), ...
                             sae1Theta, options);
 
+
+                            
 %% display the W1 of hidden layer1
 W1_hiddenL1 = reshape(sae1OptTheta(1:hiddenSizeL1*inputSize), hiddenSizeL1, inputSize);
 display_network(W1_hiddenL1'); 
@@ -110,7 +115,7 @@ sae2Theta = initializeParameters(hiddenSizeL2, hiddenSizeL1);
                                  beta, sae1Features), ...
                              sae2Theta, options);
 
-                             %% display the W1 of hidden layer1
+%% display the W1 of hidden layer1
 %W1_hiddenL2 = reshape(sae1OptTheta(1:hiddenSizeL2*hiddenSizeL1), hiddenSizeL2, hiddenSizeL1);
 %display_network(W1_hiddenL2'); 
 
@@ -141,7 +146,7 @@ saeSoftmaxTheta = 0.005 * randn(hiddenSizeL2 * numClasses, 1);
 %        set saeSoftmaxOptTheta = softmaxModel.optTheta(:);
 
 softmaxModel = struct;
-options.maxIter = 100;
+options.maxIter = 400;
 softmaxModel = softmaxTrain(hiddenSizeL2, numClasses, 1e-4, ...
                             sae2Features, trainLabels, options);
 
@@ -177,13 +182,11 @@ stackedAETheta = [ saeSoftmaxOptTheta ; stackparams ];
 %
 %
 
-[stackedAEOptTheta, cost] = fminlbfgs( @(p) stackedAECost(p, ...
+[stackedAEOptTheta, cost] = minFunc( @(p) stackedAECost(p, ...
                                    inputSize, hiddenSizeL2, ...
                                    numClasses, netconfig, ...
                                    lambda, trainData, trainLabels), ...
                               stackedAETheta, options);
-
-
 
 % -------------------------------------------------------------------------
 
